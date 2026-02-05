@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, products, admin
+from app.api.v1 import auth, measurements, products, admin, categories
 
 api_router = APIRouter()
 # api_router.include_router(health.router, tags=["health"])
@@ -11,3 +11,5 @@ api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/api/v1")
 api_router.include_router(products.router, prefix="/api/v1")
 api_router.include_router(admin.router, prefix="/api/v1")
+api_router.include_router(categories.router, prefix="/api/v1")
+api_router.include_router(measurements.router, prefix="/api/v1")
