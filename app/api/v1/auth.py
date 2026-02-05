@@ -44,9 +44,9 @@ from app.services.auth_service import register_user, login_user
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 def get_db():
-    db = SessionLocal()
+    db = SessionLocal() 
     try:
-        yield db
+        yield db    
     finally:
         db.close()
 
@@ -60,13 +60,13 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    # Swagger sends username → we treat it as email
+    
     result = login_user(
         db,
-        email=form_data.username,   # Swagger uses "username"
+        email=form_data.username,   
         password=form_data.password
     )
-    # result = login_user(db, form_data.username, form_data.password)
+    
 
     if not result:
         raise HTTPException(status_code=401, detail="Invalid credentials")

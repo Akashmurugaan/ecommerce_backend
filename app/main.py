@@ -21,5 +21,5 @@ def root():
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
-# app.include_router(auth.router, prefix="/api/v1")
-# app.include_router(products.router, prefix="/api/v1")
+
+
