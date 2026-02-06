@@ -28,9 +28,10 @@ class User(Base):
     role = Column(String, default="USER")
     is_active = Column(Boolean, default=True)
 
-    # # ✅ THIS WAS MISSING
+
     products = relationship(
         "Product",
         back_populates="seller",
         cascade="all, delete"
     )
+    measurements = relationship("Measurement", back_populates="seller")

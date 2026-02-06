@@ -7,7 +7,6 @@ from app.schemas.category import CategoryCreate, CategoryOut
 from app.dependencies.roles import require_roles
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
-
 @router.post("/", response_model=CategoryOut)
 def create_category(
     data: CategoryCreate,
