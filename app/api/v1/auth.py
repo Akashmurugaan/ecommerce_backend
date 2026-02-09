@@ -59,8 +59,7 @@ def register(data: RegisterSchema, db: Session = Depends(get_db)):
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
-):
-    
+):   
     result = login_user(
         db,
         email=form_data.username,   

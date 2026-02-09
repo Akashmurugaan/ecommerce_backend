@@ -10,6 +10,7 @@ router = APIRouter(prefix="/categories", tags=["Categories"])
 @router.post("/", response_model=CategoryOut)
 def create_category(
     data: CategoryCreate,
+
     db: Session = Depends(get_db),
     user : User=Depends(require_roles("ADMIN"))
 ):

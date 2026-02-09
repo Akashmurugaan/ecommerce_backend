@@ -29,6 +29,7 @@ from app.db.models.order import Order
 from app.db.models.wishlist import Wishlist
 from app.db.models.category import Category
 from app.db.models.measurement import Measurement
+from app.db.models.product_measurement import ProductMeasurement        
 
 target_metadata = Base.metadata
 
