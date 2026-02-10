@@ -66,7 +66,6 @@ def login(
         password=form_data.password
     )
     
-
     if not result:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
