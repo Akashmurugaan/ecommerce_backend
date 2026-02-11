@@ -199,7 +199,33 @@ def serialize_product(product: Product):
         "size": [pm.measurement.name for pm in product.sizes],
         "price": product.price,
         "stock": product.stock,
+        "image_url": f"/api/v1/products/{product.id}/image" if product.image_base64 else None,
     }
+
+
+def set_product_image(
+    db: Session,
+    product_id: int,
+    user: User,
+    *,
+    image_base64: str,
+    image_mime: str | None = None,
+    image_filename: str | None = None,
+):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(404, "Product not found")
+
+    if user.role == "SELLER" and product.seller_id != user.id:
+        raise HTTPException(403, "Not allowed")
+
+    product.image_base64 = image_base64
+    product.image_mime = image_mime
+    product.image_filename = image_filename
+
+    db.commit()
+    db.refresh(product)
+    return serialize_product(product)
 
 
 def create_product(db: Session, data: ProductCreate, seller_id: int):

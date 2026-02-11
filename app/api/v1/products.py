@@ -180,10 +180,15 @@
 
 
 
-from fastapi import APIRouter, Depends, HTTPException
+import base64
+import binascii
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.db.models.product import Product
 from app.schemas.product import (
     ProductCreate,
     ProductUpdate,
@@ -195,6 +200,7 @@ from app.services.product_service import (
     get_all_products,
     get_product_by_id,
     get_products_by_seller,
+    set_product_image,
     update_product,
     update_product_stock,
     delete_product
@@ -203,6 +209,9 @@ from app.dependencies.roles import require_roles
 from app.db.models.user import User
 
 router = APIRouter(prefix="/products", tags=["Products"])
+
+MAX_IMAGE_BYTES = 3 * 1024 * 1024  # 3MB
+ALLOWED_IMAGE_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
 
 # 🔓 Public
@@ -214,7 +223,7 @@ def my_products(
     db: Session = Depends(get_db),
     user: User = Depends(require_roles("SELLER"))
 ):
-    return get_products_by_seller(db, user.id)
+    return get_products_by_seller(db, user.id)              
 
 @router.get("/{product_id}", response_model=ProductOut)
 def product_detail(product_id: int, db: Session = Depends(get_db)):
@@ -232,7 +241,6 @@ def add_product(
     user: User = Depends(require_roles("SELLER"))
 ):
     return create_product(db, data, user.id)
-
 
 
 
@@ -264,3 +272,53 @@ def delete_product_api(
     user: User = Depends(require_roles("SELLER", "ADMIN"))
 ):
     return delete_product(db, product_id, user)
+
+
+@router.post("/{product_id}/image", response_model=ProductOut)
+def upload_product_image(
+    product_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_roles("SELLER", "ADMIN")),
+):
+    if file.content_type and file.content_type not in ALLOWED_IMAGE_MIME:
+        raise HTTPException(400, "Unsupported image type")
+
+    content = file.file.read()
+    if not content:
+        raise HTTPException(400, "Empty file")
+    if len(content) > MAX_IMAGE_BYTES:
+        raise HTTPException(413, "Image too large")
+
+    image_b64 = base64.b64encode(content).decode("ascii")
+
+    return set_product_image(
+        db,
+        product_id,
+        user,
+        image_base64=image_b64,
+        image_mime=file.content_type,
+        image_filename=file.filename,
+    )
+
+
+@router.get("/{product_id}/image")
+def get_product_image(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product or not product.image_base64:
+        raise HTTPException(404, "Image not found")
+
+    try:
+        raw = base64.b64decode(product.image_base64, validate=True)
+    except (binascii.Error, ValueError):
+        raise HTTPException(500, "Stored image is corrupted")
+
+    headers = {"Cache-Control": "public, max-age=3600"}
+    if product.image_filename:
+        headers["Content-Disposition"] = f'inline; filename="{product.image_filename}"'
+
+    return Response(
+        content=raw,
+        media_type=product.image_mime or "application/octet-stream",
+        headers=headers,
+    )

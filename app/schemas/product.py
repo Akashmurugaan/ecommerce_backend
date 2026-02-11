@@ -26,12 +26,14 @@ class ProductUpdate(BaseModel):
 
 
 class ProductOut(BaseModel):
+    id: int
     name: str
     description: str | None
     category: str
     size: list[str]
     price: float
-    stock: int    
+    stock: int
+    image_url: str | None = None
 
 # class ProductOut(BaseModel):
 #     id: int

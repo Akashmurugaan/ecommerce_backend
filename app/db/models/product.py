@@ -1,5 +1,5 @@
 # app/db/models/product.py
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -11,6 +11,10 @@ class Product(Base):
     description = Column(String)
     price = Column(Float, nullable=False)
     stock = Column(Integer, default=0)
+
+    image_base64 = Column(Text, nullable=True)
+    image_mime = Column(String, nullable=True)
+    image_filename = Column(String, nullable=True)
 
     seller_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
