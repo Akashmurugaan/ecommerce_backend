@@ -201,6 +201,7 @@ from app.services.product_service import (
     get_product_by_id,
     get_products_by_seller,
     set_product_image,
+    updated_product_image,
     update_product,
     update_product_stock,
     delete_product
@@ -214,10 +215,10 @@ MAX_IMAGE_BYTES = 3 * 1024 * 1024  # 3MB
 ALLOWED_IMAGE_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
 
-# 🔓 Public
 @router.get("/", response_model=list[ProductOut])
 def list_products(db: Session = Depends(get_db)):
     return get_all_products(db)
+
 @router.get("/my-products", response_model=list[ProductOut])
 def my_products(
     db: Session = Depends(get_db),
@@ -231,9 +232,7 @@ def product_detail(product_id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(404, "Product not found")
     return product
-
-
-# 🔒 Seller
+    
 @router.post("/", response_model=ProductOut)
 def add_product(
     data: ProductCreate,
@@ -241,8 +240,6 @@ def add_product(
     user: User = Depends(require_roles("SELLER"))
 ):
     return create_product(db, data, user.id)
-
-
 
 
 @router.put("/{product_id}", response_model=ProductOut)
@@ -264,7 +261,6 @@ def update_stock(
 ):
     return update_product_stock(db, product_id, user.id, data.stock)
 
-
 @router.delete("/{product_id}")
 def delete_product_api(
     product_id: int,
@@ -279,7 +275,7 @@ def upload_product_image(
     product_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user: User = Depends(require_roles("SELLER", "ADMIN")),
+    user: User = Depends(require_roles("SELLER")),
 ):
     if file.content_type and file.content_type not in ALLOWED_IMAGE_MIME:
         raise HTTPException(400, "Unsupported image type")
@@ -297,7 +293,36 @@ def upload_product_image(
         product_id,
         user,
         image_base64=image_b64,
-        image_mime=file.content_type,
+        image_mime=file.content_type,       
+        image_filename=file.filename,
+    )
+
+
+
+@router.put("/{product_id}/image", response_model=ProductOut)
+def update_product_image(
+    product_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_roles("SELLER")),
+):
+    if file.content_type and file.content_type not in ALLOWED_IMAGE_MIME:
+        raise HTTPException(400, "Unsupported image type")
+
+    content = file.file.read()
+    if not content:
+        raise HTTPException(400, "Empty file")
+    if len(content) > MAX_IMAGE_BYTES:
+        raise HTTPException(413, "Image too large")
+
+    image_b64 = base64.b64encode(content).decode("ascii")
+
+    return updated_product_image(
+        db,
+        product_id,
+        user,
+        image_base64=image_b64,
+        image_mime=file.content_type,       
         image_filename=file.filename,
     )
 
@@ -311,7 +336,7 @@ def get_product_image(product_id: int, db: Session = Depends(get_db)):
     try:
         raw = base64.b64decode(product.image_base64, validate=True)
     except (binascii.Error, ValueError):
-        raise HTTPException(500, "Stored image is corrupted")
+        raise HTTPException(500, "Stored image is corrupted") 
 
     headers = {"Cache-Control": "public, max-age=3600"}
     if product.image_filename:

@@ -228,6 +228,31 @@ def set_product_image(
     return serialize_product(product)
 
 
+def updated_product_image(
+    db: Session,
+    product_id: int,
+    user: User,
+    *,
+    image_base64: str,
+    image_mime: str | None = None,
+    image_filename: str | None = None,
+):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(404, "Product not found")
+
+    if user.role == "SELLER" and product.seller_id != user.id:
+        raise HTTPException(403, "Not allowed")
+
+    product.image_base64 = image_base64
+    product.image_mime = image_mime
+    product.image_filename = image_filename
+
+    db.commit()
+    db.refresh(product)
+    return serialize_product(product)
+
+
 def create_product(db: Session, data: ProductCreate, seller_id: int):
     product = Product(
         name=data.name,
@@ -297,7 +322,7 @@ def update_product(db: Session, product_id: int, data: ProductUpdate, user: User
     db.commit()
     db.refresh(product)
     return serialize_product(product)
-
+    
 
 def update_product_stock(db: Session, product_id: int, seller_id: int, stock: int):
     product = db.query(Product).filter(

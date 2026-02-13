@@ -39,7 +39,7 @@ def delete_seller(db: Session, seller_id: int):
 
 # 👤 USERS
 def get_all_users(db: Session):
-    return db.query(User).all()
+    return db.query(User).filter(User.role == "USER").all()
 
 # def block_user(db: Session, user_id: int):
 #     user = db.query(User).filter(User.id == user_id).first()
@@ -69,7 +69,6 @@ def update_user_status(
 
     return user
 
-# 📦 PRODUCTS
 def get_all_products(db: Session):
     return db.query(Product).all()
 
