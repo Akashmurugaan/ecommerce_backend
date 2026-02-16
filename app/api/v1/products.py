@@ -183,7 +183,7 @@
 import base64
 import binascii
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
@@ -198,6 +198,7 @@ from app.schemas.product import (
 from app.services.product_service import (
     create_product,
     get_all_products,
+    get_new_arrivals,
     get_product_by_id,
     get_products_by_seller,
     set_product_image,
@@ -218,6 +219,13 @@ ALLOWED_IMAGE_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 @router.get("/", response_model=list[ProductOut])
 def list_products(db: Session = Depends(get_db)):
     return get_all_products(db)
+
+@router.get("/new-arrivals", response_model=list[ProductOut])
+def new_arrivals(
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    return get_new_arrivals(db, limit=limit)
 
 @router.get("/my-products", response_model=list[ProductOut])
 def my_products(

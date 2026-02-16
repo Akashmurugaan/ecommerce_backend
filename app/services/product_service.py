@@ -183,11 +183,11 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.db.models.product import Product
+from app.db.models.category import Category
 from app.db.models.measurement import Measurement
 from app.db.models.product_measurement import ProductMeasurement
 from app.db.models.user import User
 from app.schemas.product import ProductCreate, ProductUpdate
-
 
 # 🔁 serializer (IMPORTANT)
 def serialize_product(product: Product):
@@ -294,6 +294,40 @@ def get_all_products(db: Session):
     products = db.query(Product).all()
     return [serialize_product(p) for p in products]
 
+def get_new_arrivals(db: Session, *, limit: int = 10):
+    products = (
+        db.query(Product)
+        .order_by(Product.id.desc())
+        .limit(limit)
+        .all()
+    )
+    return [serialize_product(p) for p in products]
+
+
+def get_products_by_category(
+    db: Session,
+    *,
+    category_id: int,
+    skip: int = 0,
+    limit: int = 50,
+):
+    category_exists = (
+        db.query(Category.id)
+        .filter(Category.id == category_id)
+        .first()
+    )
+    if not category_exists:
+        raise HTTPException(404, "Category not found")
+
+    products = (
+        db.query(Product)
+        .filter(Product.category_id == category_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return [serialize_product(p) for p in products]
+
 
 def get_product_by_id(db: Session, product_id: int):
     product = db.query(Product).filter(Product.id == product_id).first()
@@ -344,7 +378,7 @@ def delete_product(db: Session, product_id: int, user: User):
 
     if not product:
         raise HTTPException(404, "Product not found")
-
+    
     if user.role == "SELLER" and product.seller_id != user.id:
         raise HTTPException(403, "Not allowed")
 
