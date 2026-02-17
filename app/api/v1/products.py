@@ -354,4 +354,4 @@ def get_product_image(product_id: int, db: Session = Depends(get_db)):
         content=raw,
         media_type=product.image_mime or "application/octet-stream",
         headers=headers,
-    )
+    ) 

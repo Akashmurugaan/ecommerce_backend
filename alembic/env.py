@@ -25,6 +25,7 @@ from app.db.base import Base
 from app.db.models.user import User
 from app.db.models.product import Product
 from app.db.models.cart import Cart
+from app.db.models.cart_item import CartItem
 from app.db.models.order import Order
 from app.db.models.wishlist import Wishlist
 from app.db.models.category import Category
