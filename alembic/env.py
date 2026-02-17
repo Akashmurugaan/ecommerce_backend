@@ -28,6 +28,7 @@ from app.db.models.cart import Cart
 from app.db.models.cart_item import CartItem
 from app.db.models.order import Order
 from app.db.models.wishlist import Wishlist
+from app.db.models.wishlist_item import WishlistItem
 from app.db.models.category import Category
 from app.db.models.measurement import Measurement
 from app.db.models.product_measurement import ProductMeasurement        

@@ -38,7 +38,7 @@ def user_products_by_category(
 
 
 
-@router.get("/{product_id}", response_model=ProductOut)
+@router.get("/productdetail/{product_id}", response_model=ProductOut)
 def product_detail(product_id: int, db: Session = Depends(get_db)):
     product = get_product_by_id(db, product_id)
     if not product:

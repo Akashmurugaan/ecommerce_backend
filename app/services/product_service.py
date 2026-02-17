@@ -191,12 +191,26 @@ from app.schemas.product import ProductCreate, ProductUpdate
 
 # 🔁 serializer (IMPORTANT)
 def serialize_product(product: Product):
+    size_names: list[str] = []
+    size_ids: list[int] = []
+    size_map: dict[str, int] = {}
+
+    for pm in product.sizes:
+        measurement = pm.measurement
+        if not measurement:
+            continue
+        size_names.append(measurement.name)
+        size_ids.append(measurement.id)
+        size_map[measurement.name] = measurement.id
+
     return {
         "id": product.id,
         "name": product.name,
         "description": product.description,
         "category": product.category.name,
-        "size": [pm.measurement.name for pm in product.sizes],
+        "size": size_names,
+        "size_ids": size_ids,
+        "size_map": size_map,
         "price": product.price,
         "stock": product.stock,
         "image_url": f"/api/v1/products/{product.id}/image" if product.image_base64 else None,

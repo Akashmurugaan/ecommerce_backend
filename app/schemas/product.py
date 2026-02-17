@@ -31,6 +31,8 @@ class ProductOut(BaseModel):
     description: str | None
     category: str
     size: list[str]
+    size_ids: list[int]
+    size_map: dict[str, int]
     price: float
     stock: int
     image_url: str | None = None
