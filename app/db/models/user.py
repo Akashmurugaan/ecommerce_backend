@@ -35,3 +35,8 @@ class User(Base):
         cascade="all, delete"
     )
     measurements = relationship("Measurement", back_populates="seller")
+    addresses = relationship(
+        "Address",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

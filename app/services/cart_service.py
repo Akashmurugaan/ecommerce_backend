@@ -5,7 +5,6 @@ from app.db.models.cart_item import CartItem
 from app.db.models.product import Product
 from app.schemas.cart import AddToCart
 
-
 def get_or_create_cart(db: Session, user_id: int):
     cart = db.query(Cart).filter(Cart.user_id == user_id).first()
 
@@ -54,7 +53,6 @@ def add_to_cart(db: Session, user_id: int, data: AddToCart):
 
 
 def get_cart(db: Session, user_id: int):
-
     cart = get_or_create_cart(db, user_id)
 
     result = []
@@ -83,7 +81,6 @@ def get_cart(db: Session, user_id: int):
 
 
 def remove_cart_item(db: Session, user_id: int, item_id: int):
-
     cart = db.query(Cart).filter(Cart.user_id == user_id).first()
     if not cart:
         raise HTTPException(404, "Cart not found")
@@ -111,7 +108,7 @@ def update_cart_item_quantity(db: Session, user_id: int, item_id: int, quantity:
         CartItem.id == item_id,
         CartItem.cart_id == cart.id
     ).first()
-
+    
     if not item:
         raise HTTPException(404, "Cart item not found")
 
@@ -123,7 +120,7 @@ def update_cart_item_quantity(db: Session, user_id: int, item_id: int, quantity:
     if quantity > item.product.stock:
         raise HTTPException(400, "Not enough stock")
 
-    item.quantity = quantity
+    item.quantity = quantity 
     db.commit()
 
     return {"message": "Quantity updated"}
