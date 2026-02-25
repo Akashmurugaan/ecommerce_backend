@@ -267,7 +267,7 @@ def seller_order_items(db: Session, *, seller_id: int):
         .order_by(Order.id.desc(), OrderItem.id.desc())
         .all()
     )
-
+   
     result: list[dict] = []
     for oi, order, buyer in rows:
         result.append(

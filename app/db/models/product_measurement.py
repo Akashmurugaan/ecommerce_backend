@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
+
 class ProductMeasurement(Base):
     __tablename__ = "product_measurements"
 

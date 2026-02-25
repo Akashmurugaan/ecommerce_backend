@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
 from app.db.session import get_db
 from app.dependencies.roles import require_roles
 from app.db.models.user import User
@@ -13,9 +12,7 @@ from app.services.address_service import (
     update_address,
 )
 
-
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
-
 
 @router.get("/", response_model=list[AddressOut])
 def my_addresses(
