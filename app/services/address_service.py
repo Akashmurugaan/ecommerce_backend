@@ -136,6 +136,7 @@ def delete_address(db: Session, *, user_id: int, address_id: int):
     db.commit()
 
     if was_default:
+
         try:
             next_address = (
                 db.query(Address)

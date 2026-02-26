@@ -26,6 +26,11 @@ class Product(Base):
         back_populates="product",
         cascade="all, delete"   
     )
+    reviews = relationship(
+        "Review",
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
 
 
 

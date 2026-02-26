@@ -199,6 +199,7 @@ from app.services.product_service import (
     create_product,
     get_all_products,
     get_new_arrivals,
+    get_related_products,
     get_product_by_id,
     get_products_by_seller,
     set_product_image,
@@ -226,6 +227,14 @@ def new_arrivals(
     db: Session = Depends(get_db),
 ):
     return get_new_arrivals(db, limit=limit)
+
+@router.get("/{product_id}/related", response_model=list[ProductOut])
+def related_products(
+    product_id: int,
+    limit: int = Query(8, ge=1, le=50),
+    db: Session = Depends(get_db),
+):
+    return get_related_products(db, product_id=product_id, limit=limit)
 
 @router.get("/my-products", response_model=list[ProductOut])
 def my_products(

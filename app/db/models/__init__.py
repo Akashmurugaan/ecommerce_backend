@@ -8,6 +8,7 @@ from app.db.models.order import Order
 from app.db.models.order_item import OrderItem
 from app.db.models.product import Product
 from app.db.models.product_measurement import ProductMeasurement
+from app.db.models.review import Review
 from app.db.models.user import User
 from app.db.models.wishlist import Wishlist
 from app.db.models.wishlist_item import WishlistItem
@@ -23,6 +24,7 @@ __all__ = [
     "OrderItem",
     "Product",
     "ProductMeasurement",
+    "Review",
     "User",
     "Wishlist",
     "WishlistItem",
