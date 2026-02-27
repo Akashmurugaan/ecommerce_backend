@@ -294,3 +294,49 @@ def seller_order_items(db: Session, *, seller_id: int):
             }
         )
     return result
+
+
+def seller_update_order_status(
+    db: Session,
+    *,
+    seller_id: int,
+    order_id: int,
+    new_status: str,
+    is_admin: bool = False,
+):
+    order = (
+        db.query(Order)
+        .options(joinedload(Order.items))
+        .filter(Order.id == order_id)
+        .first()
+    )
+    if not order:
+        raise HTTPException(404, "Order not found")
+
+    if not order.items:
+        raise HTTPException(404, "Order items not found")
+
+    if not is_admin:
+        seller_ids = {item.seller_id for item in order.items}
+        if seller_id not in seller_ids:
+            raise HTTPException(403, "Permission denied")
+        if seller_ids != {seller_id}:
+            raise HTTPException(403, "Order contains items from other sellers")
+
+    current = str(order.status or "").strip().upper()
+    current = {"CANCEL": "CANCELLED", "CANCELED": "CANCELLED"}.get(current, current)
+
+    if current in {"DELIVERED", "CANCELLED"}:
+        raise HTTPException(400, f"Cannot change status from {current}")
+
+    if new_status == "SHIPPED" and current != "PENDING":
+        raise HTTPException(400, "Only PENDING orders can be marked SHIPPED")
+    if new_status == "DELIVERED" and current != "SHIPPED":
+        raise HTTPException(400, "Only SHIPPED orders can be marked DELIVERED")
+    if new_status == "CANCELLED" and current != "PENDING":
+        raise HTTPException(400, "Only PENDING orders can be CANCELLED")
+
+    order.status = new_status
+    db.commit()
+    db.refresh(order)
+    return order

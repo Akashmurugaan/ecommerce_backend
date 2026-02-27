@@ -8,6 +8,7 @@ from app.db.models.user import User
 from app.schemas.product import ProductCreate, ProductUpdate
 
 # 🔁 serializer (IMPORTANT)
+
 def serialize_product(product: Product):
     size_names: list[str] = []
     size_ids: list[int] = []
@@ -134,7 +135,7 @@ def get_new_arrivals(db: Session, *, limit: int = 10):
         .all()
     )
     return [serialize_product(p) for p in products]
-
+ 
 def get_related_products(
     db: Session,
     *,
@@ -146,7 +147,8 @@ def get_related_products(
         raise HTTPException(404, "Product not found")
 
     products = (
-        db.query(Product)
+        db.query(Product) 
+        
         .filter(
             Product.category_id == product.category_id,
             Product.id != product_id,
@@ -156,7 +158,6 @@ def get_related_products(
         .all()
     )
     return [serialize_product(p) for p in products]
-
 
 def get_products_by_category(
     db: Session,
@@ -235,7 +236,6 @@ def delete_product(db: Session, product_id: int, user: User):
     
     if user.role == "SELLER" and product.seller_id != user.id:
         raise HTTPException(403, "Not allowed")
-
     db.delete(product)
     db.commit()
     return {"message": "Product deleted"}

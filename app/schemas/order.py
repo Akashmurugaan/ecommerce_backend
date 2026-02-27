@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.address import AddressCreate
 
@@ -81,3 +81,24 @@ class SellerOrderItemOut(BaseModel):
     unit_price: float
     subtotal: float
 
+
+class OrderStatusUpdateRequest(BaseModel):
+    status: str
+
+    @field_validator("status")
+    @classmethod
+    def _normalize_status(cls, v: str) -> str:
+        status = str(v).strip().upper()
+        status = {"CANCEL": "CANCELLED", "CANCELED": "CANCELLED"}.get(status, status)
+        allowed = {"CANCELLED", "SHIPPED", "DELIVERED"}
+        if status not in allowed:
+            raise ValueError(f"Invalid status. Allowed: {sorted(allowed)}")
+        return status
+
+
+class OrderStatusUpdateOut(BaseModel):
+    id: int
+    status: str
+
+    class Config:
+        from_attributes = True
